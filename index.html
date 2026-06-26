@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Student Clearance System – Login</title>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+
+<div class="card">
+
+  <div class="logo-wrap">
+    <div class="logo-icon">
+      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 3L1 9l11 6 9-4.91V17h2V9L12 3zM5 13.18v4L12 21l7-3.82v-4L12 17l-7-3.82z"/>
+      </svg>
+    </div>
+    <h1>Student Clearance System</h1>
+    <p>Login to access your dashboard</p>
+  </div>
+
+  <div class="tab-toggle" id="tabToggle">
+    <div class="slider"></div>
+    <button class="tab-btn active" id="tabStudent" onclick="switchTab('student')">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3L1 9l11 6 9-4.91V17h2V9L12 3z"/></svg>
+      Student
+    </button>
+    <button class="tab-btn" id="tabOffice" onclick="switchTab('office')">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 21V7l9-4 9 4v14H3zm2-2h5v-5h4v5h5V8.35L12 5.1 5 8.35V19z"/></svg>
+      Office
+    </button>
+  </div>
+
+  <div class="error-msg" id="errorMsg">Please fill in all required fields.</div>
+
+  <!-- Student Form -->
+  <form id="studentForm" onsubmit="handleLogin(event,'student')">
+    <div class="field">
+      <label for="matricInput">Matric Number</label>
+      <input
+        type="text"
+        id="matricInput"
+        name="matric_number"
+        placeholder="e.g. CSC/2020/001"
+        autocomplete="off"
+        required
+      />
+    </div>
+    <button type="submit" class="btn-submit" id="studentBtn">Login as Student</button>
+  </form>
+
+  <!-- Office Form -->
+  <form id="officeForm" style="display:none" onsubmit="handleLogin(event,'office')">
+    <div class="field">
+      <label for="officeSelect">Office / Department</label>
+      <select id="officeSelect" name="office" required>
+        <option value="">Select your office</option>
+        <option value="bursary">Bursary</option>
+        <option value="head_of_department">Head of Department</option>
+        <option value="dean_of_school">Dean of School</option>
+        <option value="school_office">School Office</option>
+        <option value="student_affairs">Student Affairs</option>
+        <option value="center_of_enterprenur">Center of Entrepreneur</option>
+        <option value="admission_office">Admission Office</option>
+        <option value="library">Library</option>
+        <option value="accademic_affairs">Academic Affairs</option>
+      </select>
+    </div>
+    <div class="field">
+      <label for="officePassword">Password</label>
+      <div class="pass-wrap">
+        <input type="password" id="officePassword" name="password" placeholder="Enter office password" required/>
+        <button type="button" class="toggle-pass" onclick="togglePassword()">
+          <svg id="eyeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+    <button type="submit" class="btn-submit" id="officeBtn">Login as Office</button>
+  </form>
+
+  <div class="card-footer">
+    Returning student not in the system? <a href="request_access.html">Request access</a><br>
+    Having trouble? <a href="mailto:support@university.edu.ng">Contact support</a>
+  </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>

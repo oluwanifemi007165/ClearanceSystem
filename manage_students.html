@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Manage Students</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--blue:#2563EB;--black:#0F172A;--gray-50:#F8FAFC;--gray-100:#F1F5F9;--gray-200:#E2E8F0;--gray-400:#94A3B8;--white:#FFFFFF;--green:#16A34A;--red:#DC2626;--radius:12px}
+body{font-family:'Inter',sans-serif;background:var(--gray-50);min-height:100vh;color:var(--black);padding:30px 20px}
+.wrap{max-width:1100px;margin:0 auto}
+h1{font-family:'Sora',sans-serif;font-size:1.3rem;font-weight:700;margin-bottom:4px}
+.sub{color:var(--gray-400);font-size:.85rem;margin-bottom:24px}
+.card{background:var(--white);border:1px solid var(--gray-200);border-radius:var(--radius);padding:24px;margin-bottom:20px}
+.card h2{font-family:'Sora',sans-serif;font-size:1rem;font-weight:700;margin-bottom:16px}
+label{display:block;font-size:.78rem;font-weight:600;margin-bottom:5px;margin-top:10px}
+input,select{width:100%;padding:10px 12px;border:1.5px solid var(--gray-200);border-radius:8px;font-size:.875rem;outline:none;font-family:'Inter',sans-serif}
+input:focus,select:focus{border-color:var(--blue)}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+.btn{padding:11px 22px;background:var(--black);color:white;border:none;border-radius:8px;font-family:'Sora',sans-serif;font-size:.85rem;font-weight:700;cursor:pointer;margin-top:16px;transition:background .2s}
+.btn:hover{background:#1e293b}
+.msg{padding:11px 16px;border-radius:8px;margin-bottom:16px;font-size:.85rem}
+.msg.ok{background:#f0fdf4;border:1px solid #bbf7d0;color:var(--green)}
+.msg.err{background:#fef2f2;border:1px solid #fecaca;color:var(--red)}
+table{width:100%;border-collapse:collapse;font-size:.82rem;margin-top:10px}
+th{background:var(--gray-100);padding:9px 10px;text-align:left;font-size:.74rem;color:#475569}
+td{padding:9px 10px;border-bottom:1px solid var(--gray-100)}
+.link{color:var(--blue);text-decoration:none;font-size:.78rem;font-weight:600;margin-right:10px;cursor:pointer}
+.link.danger{color:var(--red)}
+.template-box{background:#EFF6FF;border:1px solid #BFDBFE;border-radius:8px;padding:14px 16px;margin-bottom:16px;font-size:.82rem}
+.template-box strong{display:block;margin-bottom:6px;color:#1D4ED8}
+code{background:var(--gray-200);padding:2px 6px;border-radius:4px;font-family:monospace;font-size:.78rem}
+.search-box{margin-bottom:14px}
+.tabs{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap}
+.tab-btn{padding:9px 18px;background:var(--white);border:1.5px solid var(--gray-200);border-radius:8px;font-family:'Inter',sans-serif;font-size:.85rem;font-weight:600;cursor:pointer;color:#64748b;transition:all .15s}
+.tab-btn.active{background:var(--black);color:white;border-color:var(--black)}
+.overlay{display:none;position:fixed;inset:0;background:rgba(15,23,42,.5);z-index:100;align-items:center;justify-content:center}
+.overlay.show{display:flex}
+.modal{background:var(--white);border-radius:14px;padding:28px;width:100%;max-width:480px}
+.modal h3{font-family:'Sora',sans-serif;font-size:1rem;font-weight:700;margin-bottom:16px}
+.modal-btns{display:flex;gap:10px;margin-top:16px}
+.modal-cancel{flex:1;padding:10px;background:white;border:1.5px solid var(--gray-200);border-radius:8px;font-weight:600;cursor:pointer;font-family:'Sora',sans-serif}
+.modal-confirm{flex:1;padding:10px;background:var(--black);color:white;border:none;border-radius:8px;font-weight:600;cursor:pointer;font-family:'Sora',sans-serif}
+.login-card{max-width:380px;margin:80px auto}
+.empty-note{font-size:.8rem;color:var(--gray-400);text-align:center;padding:20px}
+</style>
+</head>
+<body><div class="wrap">
+
+<h1>Manage Students</h1>
+<p class="sub">Add, edit, or remove student records without touching the database directly.</p>
+
+<div id="msgBox"></div>
+
+<!-- Login gate -->
+<div class="card login-card" id="loginCard">
+  <h2>Admin Login</h2>
+  <form id="loginForm">
+    <label>Password</label>
+    <input type="password" id="adminPassword" required/>
+    <button class="btn" type="submit">Login</button>
+  </form>
+</div>
+
+<!-- Main content (hidden until authed) -->
+<div id="mainContent" style="display:none">
+
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="single" onclick="showTab('single', this)">Add Single Student</button>
+    <button class="tab-btn" data-tab="bulk" onclick="showTab('bulk', this)">Bulk CSV Import</button>
+    <button class="tab-btn" data-tab="list" onclick="showTab('list', this)">All Students (<span id="studentCount">0</span>)</button>
+    <button class="tab-btn" data-tab="requests" onclick="showTab('requests', this)">Pending Requests (<span id="requestCount">0</span>)</button>
+  </div>
+
+  <!-- Single add -->
+  <div id="tab-single" class="card">
+    <h2>Add New Student</h2>
+    <form id="addForm">
+      <div class="row">
+        <div><label>Full Name</label><input type="text" name="full_name" placeholder="John Adebayo" required/></div>
+        <div><label>Matric Number</label><input type="text" name="matric_number" placeholder="CSC/2024/050" required/></div>
+      </div>
+      <div class="row3">
+        <div><label>Department</label><input type="text" name="department" placeholder="Computer Science"/></div>
+        <div><label>Level</label><input type="text" name="level" placeholder="ND2"/></div>
+        <div><label>Email</label><input type="email" name="email" placeholder="john@email.com"/></div>
+      </div>
+      <button class="btn" type="submit">Add Student</button>
+    </form>
+  </div>
+
+  <!-- Bulk import -->
+  <div id="tab-bulk" class="card" style="display:none">
+    <h2>Bulk Import via CSV</h2>
+    <div class="template-box">
+      <strong>Required CSV column headers:</strong>
+      <code>full_name, matric_number, department, level, email</code>
+      <p style="margin-top:8px;color:#3B82F6">Useful for re-registering returning students after 2-3 years away — just prepare one CSV with all of them.</p>
+    </div>
+    <form id="csvForm" enctype="multipart/form-data">
+      <label>Select CSV File</label>
+      <input type="file" name="csv_file" id="csvFile" accept=".csv" required/>
+      <button class="btn" type="submit">Import Students</button>
+    </form>
+  </div>
+
+  <!-- All students list -->
+  <div id="tab-list" class="card" style="display:none">
+    <h2>All Registered Students</h2>
+    <input class="search-box" type="text" id="searchBox" placeholder="Search by name or matric number..." oninput="filterTable()"/>
+    <table id="studentsTable">
+      <thead><tr><th>Name</th><th>Matric</th><th>Department</th><th>Level</th><th>Email</th><th>Action</th></tr></thead>
+      <tbody id="studentsBody">
+        <tr><td colspan="6" class="empty-note">Loading…</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Registration requests -->
+  <div id="tab-requests" class="card" style="display:none">
+    <h2>Pending Registration Requests</h2>
+    <p style="font-size:.82rem;color:var(--gray-400);margin-bottom:14px">
+      Requests from returning students whose accounts are no longer in the system.
+    </p>
+    <table>
+      <thead><tr><th>Name</th><th>Matric</th><th>Department</th><th>Level</th><th>Email</th><th>Reason</th><th>Action</th></tr></thead>
+      <tbody id="requestsBody">
+        <tr><td colspan="7" class="empty-note">Loading…</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+</div><!-- end mainContent -->
+
+<!-- Edit modal -->
+<div class="overlay" id="editOverlay">
+  <div class="modal">
+    <h3>Edit Student</h3>
+    <form id="editForm">
+      <input type="hidden" id="editId"/>
+      <label>Full Name</label><input type="text" id="editName" required/>
+      <label>Matric Number</label><input type="text" id="editMatric" required/>
+      <label>Department</label><input type="text" id="editDept"/>
+      <label>Level</label><input type="text" id="editLevel"/>
+      <label>Email</label><input type="email" id="editEmail"/>
+      <div class="modal-btns">
+        <button type="button" class="modal-cancel" onclick="closeEdit()">Cancel</button>
+        <button type="submit" class="modal-confirm">Save Changes</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script src="manage_students.js"></script>
+</div></body></html>

@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Clearance Form</title>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{--blue:#2563EB;--black:#0F172A;--gray-50:#F8FAFC;--gray-100:#F1F5F9;--gray-200:#E2E8F0;--gray-400:#94A3B8;--white:#FFFFFF;--green:#16A34A;--radius:12px}
+    body{font-family:'Inter',sans-serif;background:var(--gray-50);min-height:100vh;color:var(--black)}
+    .topbar{background:var(--white);border-bottom:1px solid var(--gray-200);padding:0 40px;height:60px;display:flex;align-items:center}
+    .back-btn{display:flex;align-items:center;gap:8px;background:none;border:none;cursor:pointer;font-family:'Inter',sans-serif;font-size:.9rem;font-weight:500;color:var(--black)}
+    .back-btn:hover{color:var(--blue)}.back-btn svg{width:18px;height:18px}
+    .main{max-width:720px;margin:0 auto;padding:40px 24px}
+    .card{background:var(--white);border:1px solid var(--gray-200);border-radius:var(--radius);padding:32px}
+    .card h2{font-family:'Sora',sans-serif;font-size:1.2rem;font-weight:700;margin-bottom:4px}
+    .card .subtitle{font-size:.875rem;color:var(--gray-400);margin-bottom:28px}
+    .info-block{background:var(--gray-100);border-radius:10px;padding:20px 24px;display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:28px}
+    .info-block .item label{display:block;font-size:.72rem;color:var(--gray-400);margin-bottom:2px}
+    .info-block .item .val{font-size:.95rem;font-weight:600}
+    .field{margin-bottom:20px}
+    .field label{display:block;font-size:.82rem;font-weight:600;margin-bottom:7px}
+    .field label span{color:var(--blue)}
+    .field input,.field textarea{width:100%;padding:11px 14px;border:1.5px solid var(--gray-200);border-radius:8px;font-family:'Inter',sans-serif;font-size:.9rem;color:var(--black);background:var(--gray-100);outline:none;resize:none;transition:border-color .2s,background .2s}
+    .field input:focus,.field textarea:focus{border-color:var(--blue);background:var(--white);box-shadow:0 0 0 3px rgba(37,99,235,.1)}
+    .field textarea{height:80px}
+    .process-box{background:#EFF6FF;border:1px solid #BFDBFE;border-radius:10px;padding:20px 24px;margin-bottom:28px}
+    .process-box h3{font-family:'Sora',sans-serif;font-size:.95rem;font-weight:700;color:#1D4ED8;margin-bottom:8px}
+    .process-box p{font-size:.82rem;color:#3B82F6;margin-bottom:12px}
+    .process-box ol{list-style:none;counter-reset:step;display:flex;flex-direction:column;gap:6px}
+    .process-box ol li{counter-increment:step;display:flex;align-items:center;gap:10px;font-size:.85rem;color:#1E40AF;font-weight:500}
+    .process-box ol li::before{content:counter(step);width:22px;height:22px;background:#BFDBFE;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:700;color:#1D4ED8;flex-shrink:0}
+    .btn-row{display:flex;gap:14px}
+    .btn-cancel{flex:1;padding:13px;background:var(--white);color:var(--black);border:1.5px solid var(--gray-200);border-radius:8px;font-family:'Sora',sans-serif;font-size:.9rem;font-weight:600;cursor:pointer;transition:background .15s}
+    .btn-cancel:hover{background:var(--gray-100)}
+    .btn-submit{flex:2;padding:13px;background:var(--black);color:var(--white);border:none;border-radius:8px;font-family:'Sora',sans-serif;font-size:.9rem;font-weight:600;cursor:pointer;transition:background .2s}
+    .btn-submit:hover{background:#1e293b}.btn-submit.loading{opacity:.7;pointer-events:none}
+    .err{color:#DC2626;font-size:.82rem;margin-bottom:12px;display:none}
+    .overlay{display:none;position:fixed;inset:0;background:rgba(15,23,42,.5);z-index:100;align-items:center;justify-content:center}
+    .overlay.show{display:flex}
+    .success-box{background:var(--white);border-radius:20px;padding:44px 40px;text-align:center;max-width:380px;width:100%;animation:pop .4s cubic-bezier(.22,.68,0,1.3) both}
+    @keyframes pop{from{opacity:0;transform:scale(.8)}to{opacity:1;transform:scale(1)}}
+    .success-icon{width:64px;height:64px;border-radius:50%;background:#F0FDF4;margin:0 auto 16px;display:flex;align-items:center;justify-content:center}
+    .success-icon svg{width:32px; height:32px}
+    .success-box h3{font-family:'Sora',sans-serif; font-size:1.2rem; font-weight:700; margin-bottom:8px}
+    .success-box p{font-size:.875rem;color:var(--gray-400);margin-bottom:24px}
+    .btn-go{width:100%;padding:12px;background:var(--black);color:var(--white);border:none;border-radius:8px;font-family:'Sora',sans-serif;font-size:.9rem;font-weight:600;cursor:pointer}
+    .btn-go:hover{background:#1e293b}
+  </style>
+</head>
+<body>
+<div class="topbar">
+  <button class="back-btn" onclick="window.location.href='dashboard.html'">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+    Back to Dashboard
+  </button>
+</div>
+<div class="main">
+  <div class="card">
+    <h2>Student Clearance Form</h2>
+    <p class="subtitle">Fill out this form to initiate your clearance process</p>
+    <div class="info-block">
+      <div class="item"><label>Matric Number</label><div class="val" id="infoMatric">—</div></div>
+      <div class="item"><label>Name</label><div class="val" id="infoName">—</div></div>
+      <div class="item"><label>Department</label><div class="val" id="infoDept">—</div></div>
+      <div class="item"><label>Level</label><div class="val" id="infoLevel">—</div></div>
+    </div>
+    <div class="field"><label>Reason for Clearance <span>*</span></label><textarea id="reason" placeholder="E.g., Graduation, Transfer, etc."></textarea></div>
+    <div class="field"><label>Current Address <span>*</span></label><input type="text" id="address" placeholder="Enter your full address"/></div>
+    <div class="field"><label>Phone Number <span>*</span></label><input type="tel" id="phone" placeholder="080XXXXXXXXX" maxlength="11"/></div>
+    <div class="field"><label>Emergency Contact <span>*</span></label><input type="text" id="emergency" placeholder="Name and phone number"/></div>
+    <div class="process-box">
+      <h3>Clearance Process</h3>
+      <p>Your clearance will go through the following offices in order:</p>
+      <ol><li>Library</li><li>Bursary</li><li>Department</li><li>Hostel</li><li>Security</li><li>Rector's Office (Final Approval)</li></ol>
+    </div>
+    <div class="err" id="errMsg"></div>
+    <div class="btn-row">
+      <button class="btn-cancel" onclick="window.location.href='dashboard.html'">Cancel</button>
+      <button class="btn-submit" id="submitBtn" onclick="submitForm()">Submit Clearance Form</button>
+    </div>
+  </div>
+</div>
+<div class="overlay" id="overlay">
+  <div class="success-box">
+    <div class="success-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#16A34A" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></div>
+    <h3>Form Submitted!</h3>
+    <p>Your clearance request has been submitted. Track your progress from your dashboard.</p>
+    <button class="btn-go" onclick="window.location.href='dashboard.html'">Back to Dashboard</button>
+  </div>
+</div>
+<script>
+  // Guard: check payment status from DB
+  fetch('get_student_status.php').then(r=>r.json()).then(s=>{
+    if(!s.success||s.payment_status!=='paid'){ window.location.href='dashboard.html'; }
+  });
+
+  // Load student info
+  fetch('get_session_info.php').then(r=>r.json()).then(info=>{
+    if(!info.success){window.location.href='index.html';return}
+    document.getElementById('infoMatric').textContent = info.matric     || '—';
+    document.getElementById('infoName').textContent   = info.full_name  || '—';
+    document.getElementById('infoDept').textContent   = info.department || '—';
+    document.getElementById('infoLevel').textContent  = info.level      || '—';
+  });
+
+  function submitForm() {
+    const reason    = document.getElementById('reason').value.trim();
+    const address   = document.getElementById('address').value.trim();
+    const phone     = document.getElementById('phone').value.trim();
+    const emergency = document.getElementById('emergency').value.trim();
+    const err       = document.getElementById('errMsg');
+    if(!reason||!address||!phone||!emergency){
+      err.textContent='Please fill in all required fields.';err.style.display='block';return;
+    }
+    err.style.display='none';
+    const btn=document.getElementById('submitBtn');
+    btn.textContent='Submitting…';btn.classList.add('loading');
+
+    // Send to PHP — saves to DB
+    fetch('submit_form.php',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({reason,address,phone,emergency})
+    })
+    .then(r=>r.json())
+    .then(data=>{
+      if(data.success){
+        document.getElementById('overlay').classList.add('show');
+      } else {
+        err.textContent=data.message;err.style.display='block';
+      }
+    })
+    .catch(()=>{err.textContent='Server error. Try again.';err.style.display='block';})
+    .finally(()=>{btn.textContent='Submit Clearance Form';btn.classList.remove('loading');});
+  }
+</script>
+</body>
+</html>

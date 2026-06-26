@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Student Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{--blue:#2563EB;--black:#0F172A;--gray-50:#F8FAFC;--gray-100:#F1F5F9;--gray-200:#E2E8F0;--gray-400:#94A3B8;--gray-600:#475569;--white:#FFFFFF;--green:#16A34A;--red:#DC2626;--radius:12px}
+    body{font-family:'Inter',sans-serif;background:var(--gray-50);min-height:100vh;color:var(--black)}
+    .navbar{background:var(--white);border-bottom:1px solid var(--gray-200);padding:0 40px;height:64px;display:flex;align-items:center;justify-content:space-between}
+    .navbar-left h1{font-family:'Sora',sans-serif;font-size:1.25rem;font-weight:700}
+    .navbar-left p{font-size:.85rem;color:var(--gray-400);margin-top:1px}
+    .btn-logout{display:flex;align-items:center;gap:7px;background:none;border:1px solid var(--gray-200);border-radius:8px;padding:8px 16px;font-family:'Inter',sans-serif;font-size:.875rem;font-weight:500;color:var(--gray-600);cursor:pointer;transition:background .15s}
+    .btn-logout:hover{background:var(--gray-100)}
+    .btn-logout svg{width:16px;height:16px}
+    .main{max-width:1200px;margin:0 auto;padding:36px 40px}
+    .info-card{background:var(--white);border:1px solid var(--gray-200);border-radius:var(--radius);padding:28px 32px;margin-bottom:28px}
+    .info-card h2{font-family:'Sora',sans-serif;font-size:1rem;font-weight:600;margin-bottom:20px}
+    .info-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px 40px}
+    .info-item label{display:block;font-size:.75rem;color:var(--gray-400);margin-bottom:4px;letter-spacing:.03em}
+    .info-item .value{font-size:1rem;font-weight:600}
+    .badge{display:inline-flex;align-items:center;gap:5px;padding:4px 12px;border-radius:20px;font-size:.78rem;font-weight:600}
+    .badge.not-paid{background:var(--red);color:white}
+    .badge.paid{background:var(--black);color:white}
+    .badge-dot{width:6px;height:6px;border-radius:50%;background:currentColor}
+    .cards-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+    .action-card{background:var(--white);border:1px solid var(--gray-200);border-radius:var(--radius);padding:28px 24px;display:flex;flex-direction:column;gap:12px}
+    .card-icon{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center}
+    .card-icon.blue{background:#EFF6FF}.card-icon.green{background:#F0FDF4}.card-icon.purple{background:#F5F3FF}
+    .card-icon svg{width:22px;height:22px}
+    .action-card h3{font-family:'Sora',sans-serif;font-size:1rem;font-weight:600}
+    .action-card p{font-size:.85rem;color:var(--gray-400);flex:1}
+    .btn-primary{width:100%;padding:11px;background:var(--black);color:var(--white);border:none;border-radius:8px;font-family:'Sora',sans-serif;font-size:.875rem;font-weight:600;cursor:pointer;transition:background .2s}
+    .btn-primary:hover{background:#1e293b}
+    .btn-disabled{width:100%;padding:11px;background:var(--gray-400);color:var(--white);border:none;border-radius:8px;font-family:'Sora',sans-serif;font-size:.875rem;font-weight:600;cursor:not-allowed}
+
+    /* ── Clearance Status Card ── */
+    .status-card{background:var(--white);border:1px solid var(--gray-200);border-radius:var(--radius);padding:28px 32px;margin-top:24px}
+    .status-card h2{font-family:'Sora',sans-serif;font-size:1rem;font-weight:600;margin-bottom:4px}
+    .status-sub{font-size:.82rem;color:var(--gray-400);margin-bottom:20px}
+    .status-row{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+    .status-item label{display:block;font-size:.72rem;color:var(--gray-400);margin-bottom:6px;text-transform:uppercase;letter-spacing:.04em}
+    .status-item .val{font-size:.95rem;font-weight:600}
+    .clr-badge{display:inline-flex;align-items:center;gap:6px;padding:5px 14px;border-radius:20px;font-size:.8rem;font-weight:600}
+    .clr-badge.in-progress{background:#EFF6FF;color:#2563EB;border:1px solid #BFDBFE}
+    .clr-badge.completed{background:#F0FDF4;color:#16A34A;border:1px solid #BBF7D0}
+    .clr-badge.rejected{background:#FEF2F2;color:#DC2626;border:1px solid #FECACA}
+    .clr-dot{width:7px;height:7px;border-radius:50%;background:currentColor}
+    .view-btn{display:inline-flex;align-items:center;gap:7px;padding:10px 20px;background:var(--black);color:var(--white);border:none;border-radius:8px;font-family:'Sora',sans-serif;font-size:.875rem;font-weight:600;cursor:pointer;margin-top:20px;text-decoration:none;transition:background .2s}
+    .view-btn:hover{background:#1e293b}
+  </style>
+</head>
+<body>
+<nav class="navbar">
+  <div class="navbar-left">
+    <h1>Student Dashboard</h1>
+    <p>Welcome, <span id="navName">—</span></p>
+  </div>
+  <button class="btn-logout" onclick="window.location.href='logout.php'">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+    Logout
+  </button>
+</nav>
+
+<main class="main">
+
+  <!-- Student Info -->
+  <div class="info-card">
+    <h2>Student Information</h2>
+    <div class="info-grid">
+      <div class="info-item"><label>Matric Number</label><div class="value" id="infoMatric">—</div></div>
+      <div class="info-item"><label>Department</label><div class="value" id="infoDept">—</div></div>
+      <div class="info-item"><label>Level</label><div class="value" id="infoLevel">—</div></div>
+      <div class="info-item">
+        <label>Payment Status</label>
+        <div id="paymentBadge"><span class="badge not-paid"><span class="badge-dot"></span>Not Paid</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Action Cards -->
+  <div class="cards-grid">
+    <div class="action-card">
+      <div class="card-icon blue">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+      </div>
+      <h3>Make Payment</h3>
+      <p>Pay clearance fee before filling form</p>
+      <button class="btn-primary" id="payBtn" onclick="window.location.href='payment.html'">Pay Now</button>
+    </div>
+
+    <div class="action-card">
+      <div class="card-icon green">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#16A34A" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+      </div>
+      <h3>Fill Clearance Form</h3>
+      <p>Submit your clearance application</p>
+      <button class="btn-disabled" id="formBtn">Payment Required</button>
+    </div>
+
+    <div class="action-card">
+      <div class="card-icon purple">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#7C3AED" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      </div>
+      <h3>Track Clearance</h3>
+      <p>Monitor your clearance progress</p>
+      <button class="btn-disabled" id="trackBtn">No Active Clearance</button>
+    </div>
+  </div>
+
+  <!-- Current Clearance Status (hidden until form submitted) -->
+  <div id="clearanceStatusSection" style="display:none">
+    <div class="status-card">
+      <h2>Current Clearance Status</h2>
+      <p class="status-sub" id="clearanceIdText">Clearance ID: —</p>
+
+      <div class="status-row">
+        <div class="status-item">
+          <label>Status</label>
+          <span id="clearanceStatusBadge" class="clr-badge in-progress">
+            <span class="clr-dot"></span>In Progress
+          </span>
+        </div>
+        <div class="status-item">
+          <label>Current Office</label>
+          <div class="val" id="currentOfficeText">—</div>
+        </div>
+        <div class="status-item">
+          <label>Progress</label>
+          <div class="val" id="clearanceProgressText">0 of 9 offices</div>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:20px" id="certBtnRow">
+      <a class="view-btn" href="track_clearance.html" style="margin-top:0">
+        <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" style="width:15px;height:15px">
+          <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+        View Full Details
+      </a>
+      <a id="certBtn" href="clearance_certificate.php" style="display:none;margin-top:0;background:#16A34A" class="view-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" style="width:15px;height:15px">
+          <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+          <polyline points="7 10 12 15 17 10"/>
+          <line x1="12" y1="15" x2="12" y2="3"/>
+        </svg>
+        Download Certificate
+      </a>
+    </div>
+    </div>
+  </div>
+
+</main>
+
+<script>
+  const OFFICES = [
+    { key:'bursary',               name:'Bursary' },
+    { key:'head_of_department',    name:'Head of Department' },
+    { key:'dean_of_school',        name:'Dean of School' },
+    { key:'school_office',         name:'School Office' },
+    { key:'student_affairs',       name:'Student Affairs' },
+    { key:'center_of_enterprenur', name:'Center of Entrepreneur' },
+    { key:'admission_office',      name:'Admission Office' },
+    { key:'library',               name:'Library' },
+    { key:'accademic_affairs',     name:'Academic Affairs' },
+  ];
+
+  Promise.all([
+    fetch('get_session_info.php').then(r => r.json()),
+    fetch('get_student_status.php').then(r => r.json())
+  ])
+  .then(([info, status]) => {
+    if (!info.success || !status.success) { window.location.href = 'index.html'; return; }
+
+    // Populate info
+    document.getElementById('navName').textContent    = info.full_name  || '—';
+    document.getElementById('infoMatric').textContent = info.matric     || '—';
+    document.getElementById('infoDept').textContent   = info.department || '—';
+    document.getElementById('infoLevel').textContent  = info.level      || '—';
+
+    const payStatus = status.payment_status;
+    const hasForm   = status.form_submitted === 'true';
+    const badge     = document.getElementById('paymentBadge');
+    const payBtn    = document.getElementById('payBtn');
+    const formBtn   = document.getElementById('formBtn');
+    const trackBtn  = document.getElementById('trackBtn');
+
+    // ── Payment state ─────────────────────────────────────────
+    if (payStatus === 'paid') {
+      badge.innerHTML         = '<span class="badge paid"><span class="badge-dot"></span>Paid</span>';
+      payBtn.textContent      = 'Payment Done';
+      payBtn.style.background = '#16A34A';
+      payBtn.style.cursor     = 'default';
+      payBtn.onclick          = null;
+      formBtn.className       = 'btn-primary';
+      formBtn.textContent     = 'Fill Form';
+      formBtn.onclick         = () => window.location.href = 'clearance_form.html';
+
+    } else if (payStatus === 'pending') {
+      badge.innerHTML         = '<span class="badge" style="background:#D97706;color:white"><span class="badge-dot"></span>Awaiting Verification</span>';
+      payBtn.textContent      = 'Receipt Submitted';
+      payBtn.style.background = '#D97706';
+      payBtn.style.cursor     = 'default';
+      payBtn.onclick          = null;
+      formBtn.className       = 'btn-disabled';
+      formBtn.textContent     = 'Awaiting Payment Verification';
+
+    } else {
+      badge.innerHTML    = '<span class="badge not-paid"><span class="badge-dot"></span>Not Paid</span>';
+      payBtn.className   = 'btn-primary';
+      payBtn.textContent = 'Pay Now';
+      payBtn.onclick     = () => window.location.href = 'payment.html';
+    }
+
+    // ── Form submitted state ──────────────────────────────────
+    if (hasForm) {
+      formBtn.textContent       = 'Form Submitted';
+      formBtn.style.background  = '#16A34A';
+      formBtn.style.cursor      = 'default';
+      formBtn.onclick           = null;
+      trackBtn.className        = 'btn-primary';
+      trackBtn.style.background = '#7C3AED';
+      trackBtn.textContent      = 'View Progress';
+      trackBtn.onclick          = () => window.location.href = 'track_clearance.html';
+
+      // Show and populate clearance status section
+      renderClearanceStatus(status);
+    }
+  })
+  .catch(() => window.location.href = 'index.html');
+
+  function renderClearanceStatus(status) {
+    const section = document.getElementById('clearanceStatusSection');
+    section.style.display = 'block';
+
+    const statuses    = status.statuses    || {};
+    const clearanceId = status.clearance_id || '—';
+    const approved    = Object.values(statuses).filter(s => s.status === 'approved').length;
+    const total       = OFFICES.length;
+    const allDone     = approved === total;
+    const hasRejection= Object.values(statuses).some(s => s.status === 'rejected');
+
+    // Clearance ID
+    document.getElementById('clearanceIdText').textContent = 'Clearance ID: ' + clearanceId;
+
+    // Progress
+    document.getElementById('clearanceProgressText').textContent = approved + ' of ' + total + ' offices';
+
+    // Current office
+    let currentOffice = '—';
+    if (allDone) {
+      currentOffice = 'Fully Cleared ✅';
+    } else if (hasRejection) {
+      for (const o of OFFICES) {
+        if ((statuses[o.key] || {}).status === 'rejected') {
+          currentOffice = o.name + ' (Rejected)';
+          break;
+        }
+      }
+    } else {
+      for (const o of OFFICES) {
+        const s = (statuses[o.key] || {}).status;
+        if (!s || s === 'pending') { currentOffice = o.name; break; }
+      }
+    }
+    document.getElementById('currentOfficeText').textContent = currentOffice;
+
+    // Status badge
+    const badgeEl = document.getElementById('clearanceStatusBadge');
+    if (allDone) {
+      badgeEl.className   = 'clr-badge completed';
+      badgeEl.innerHTML   = '<span class="clr-dot"></span>Completed';
+      // Show Download Certificate button
+      const certBtn = document.getElementById('certBtn');
+      if (certBtn) certBtn.style.display = 'inline-flex';
+    } else if (hasRejection) {
+      badgeEl.className   = 'clr-badge rejected';
+      badgeEl.innerHTML   = '<span class="clr-dot"></span>Action Required';
+    } else {
+      badgeEl.className   = 'clr-badge in-progress';
+      badgeEl.innerHTML   = '<span class="clr-dot"></span>In Progress';
+    }
+  }
+
+  function logout() { window.location.href = 'logout.php'; }
+</script>
+</body>
+</html>

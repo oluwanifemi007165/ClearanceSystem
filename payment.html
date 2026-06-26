@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Make Payment</title>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <!-- Paystack inline JS -->
+  <script src="https://js.paystack.co/v1/inline.js"></script>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{--blue:#2563EB;--black:#0F172A;--gray-50:#F8FAFC;--gray-100:#F1F5F9;--gray-200:#E2E8F0;--gray-400:#94A3B8;--gray-600:#475569;--white:#FFFFFF;--green:#16A34A;--red:#DC2626;--radius:12px}
+    body{font-family:'Inter',sans-serif;background:var(--gray-50);min-height:100vh;color:var(--black)}
+    .topbar{background:var(--white);border-bottom:1px solid var(--gray-200);padding:0 40px;height:60px;display:flex;align-items:center}
+    .back-btn{display:flex;align-items:center;gap:8px;background:none;border:none;cursor:pointer;font-family:'Inter',sans-serif;font-size:.9rem;font-weight:500;color:var(--black)}
+    .back-btn:hover{color:var(--blue)}.back-btn svg{width:18px;height:18px}
+    .main{max-width:960px;margin:0 auto;padding:40px 24px;display:grid;grid-template-columns:1fr 380px;gap:24px}
+    .card{background:var(--white);border:1px solid var(--gray-200);border-radius:var(--radius);padding:28px}
+    .card h2{font-family:'Sora',sans-serif;font-size:1.1rem;font-weight:700;margin-bottom:6px}
+    .card .subtitle{font-size:.85rem;color:var(--gray-400);margin-bottom:28px}
+    .right-col{display:flex;flex-direction:column;gap:20px}
+    .summary-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0}
+    .summary-row+.summary-row{border-top:1px solid var(--gray-100)}
+    .summary-row.total{border-top:2px solid var(--gray-200);font-weight:700;font-size:1rem}
+    .summary-row label{font-size:.875rem;color:var(--gray-600)}
+    .summary-row .amount{font-size:.9rem;font-weight:600}
+    .detail-row{display:flex;flex-direction:column;padding:10px 0;border-bottom:1px solid var(--gray-100)}
+    .detail-row:last-child{border-bottom:none}
+    .detail-row .dlabel{font-size:.75rem;color:var(--gray-400);margin-bottom:2px}
+    .detail-row .dvalue{font-size:.9rem;font-weight:600}
+
+    /* Pay button */
+    .btn-pay{width:100%;padding:16px;background:var(--black);color:var(--white);border:none;border-radius:8px;font-family:'Sora',sans-serif;font-size:1rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;transition:background .2s;margin-bottom:12px}
+    .btn-pay:hover{background:#1e293b}
+    .btn-pay.loading{opacity:.7;pointer-events:none}
+    .btn-pay svg{width:18px;height:18px}
+
+    /* Info box */
+    .info-box{background:#EFF6FF;border:1px solid #BFDBFE;border-radius:10px;padding:16px 18px;margin-bottom:20px}
+    .info-box h3{font-family:'Sora',sans-serif;font-size:.875rem;font-weight:700;color:#1D4ED8;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+    .info-box ul{list-style:none;display:flex;flex-direction:column;gap:6px}
+    .info-box ul li{font-size:.82rem;color:#3B82F6;display:flex;align-items:center;gap:7px}
+    .info-box ul li::before{content:"✓";font-weight:700;color:#2563EB}
+
+    /* Paystack badge */
+    .paystack-badge{display:flex;align-items:center;justify-content:center;gap:6px;font-size:.75rem;color:var(--gray-400);margin-top:4px}
+    .paystack-badge svg{width:14px;height:14px}
+
+    /* Error */
+    .err{font-size:.82rem;padding:10px 14px;background:#FEF2F2;border:1px solid #FECACA;color:#DC2626;border-radius:8px;margin-bottom:12px;display:none}
+
+    /* Success overlay */
+    .overlay{display:none;position:fixed;inset:0;background:rgba(15,23,42,.5);z-index:100;align-items:center;justify-content:center}
+    .overlay.show{display:flex}
+    .success-box{background:var(--white);border-radius:20px;padding:44px 40px;text-align:center;max-width:400px;width:100%;animation:pop .4s cubic-bezier(.22,.68,0,1.3) both}
+    @keyframes pop{from{opacity:0;transform:scale(.8)}to{opacity:1;transform:scale(1)}}
+    .success-icon{width:64px;height:64px;border-radius:50%;background:#F0FDF4;margin:0 auto 16px;display:flex;align-items:center;justify-content:center}
+    .success-icon svg{width:32px;height:32px}
+    .success-box h3{font-family:'Sora',sans-serif;font-size:1.2rem;font-weight:700;margin-bottom:8px}
+    .success-box p{font-size:.875rem;color:var(--gray-400);margin-bottom:24px;line-height:1.6}
+    .btn-continue{width:100%;padding:12px;background:var(--black);color:var(--white);border:none;border-radius:8px;font-family:'Sora',sans-serif;font-size:.9rem;font-weight:600;cursor:pointer}
+    .btn-continue:hover{background:#1e293b}
+  </style>
+</head>
+<body>
+
+<div class="topbar">
+  <button class="back-btn" onclick="window.location.href='dashboard.html'">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+    Back to Dashboard
+  </button>
+</div>
+
+<div class="main">
+
+  <!-- Left: Payment -->
+  <div class="card">
+    <h2>Make Payment</h2>
+    <p class="subtitle">Pay your clearance fee securely via Paystack</p>
+
+    <!-- What Paystack supports -->
+    <div class="info-box">
+      <h3>
+        <svg viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="2" style="width:15px;height:15px"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+        Accepted Payment Methods
+      </h3>
+      <ul>
+        <li>Debit / Credit Card (Visa, Mastercard, Verve)</li>
+        <li>Bank Transfer</li>
+        <li>USSD</li>
+        <li>Bank Account (Direct Debit)</li>
+      </ul>
+    </div>
+
+    <div class="err" id="errMsg"></div>
+
+    <button class="btn-pay" id="payBtn" onclick="initiatePayment()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+      Pay ₦5,100.00 Now
+    </button>
+
+    <div class="paystack-badge">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      Secured by Paystack
+    </div>
+  </div>
+
+  <!-- Right: Summary + Student details -->
+  <div class="right-col">
+    <div class="card">
+      <h2>Payment Summary</h2>
+      <div class="summary-row"><label>Clearance Fee</label><span class="amount">₦5,000.00</span></div>
+      <div class="summary-row"><label>Processing Fee</label><span class="amount">₦100.00</span></div>
+      <div class="summary-row total"><label>Total Amount</label><span class="amount">₦5,100.00</span></div>
+    </div>
+    <div class="card">
+      <h2 style="margin-bottom:16px">Student Details</h2>
+      <div class="detail-row"><span class="dlabel">Name</span><span class="dvalue" id="detailName">—</span></div>
+      <div class="detail-row"><span class="dlabel">Matric Number</span><span class="dvalue" id="detailMatric">—</span></div>
+      <div class="detail-row"><span class="dlabel">Department</span><span class="dvalue" id="detailDept">—</span></div>
+      <div class="detail-row"><span class="dlabel">Email</span><span class="dvalue" id="detailEmail">—</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- Success overlay -->
+<div class="overlay" id="overlay">
+  <div class="success-box">
+    <div class="success-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#16A34A" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+    </div>
+    <h3>Payment Successful!</h3>
+    <p>Your clearance fee of <strong>₦5,100.00</strong> has been received and verified. You can now fill your clearance form.</p>
+    <button class="btn-continue" onclick="window.location.href='clearance_form.html'">Fill Clearance Form Now</button>
+  </div>
+</div>
+
+<script>
+  // Public key from paystack_config.php (safe to expose in frontend)
+  const PAYSTACK_PUBLIC_KEY = 'pk_test_a6937cac5d90450007a0fba6f2b29fe9326f08a3';
+  const AMOUNT_KOBO         = 510000; // ₦5,100 in kobo
+
+  let studentEmail  = '';
+  let studentName   = '';
+  let studentMatric = '';
+  let studentId     = 0;
+
+  // Load student info from PHP session
+  fetch('get_session_info.php')
+    .then(r => r.json())
+    .then(info => {
+      if (!info.success) { window.location.href = 'login.html'; return; }
+      studentName   = info.full_name  || '';
+      studentMatric = info.matric     || '';
+      studentEmail  = info.email      || '';
+      studentId     = info.student_id || 0;
+
+      document.getElementById('detailName').textContent   = info.full_name  || '—';
+      document.getElementById('detailMatric').textContent = info.matric     || '—';
+      document.getElementById('detailDept').textContent   = info.department || '—';
+      document.getElementById('detailEmail').textContent  = info.email      || '—';
+    });
+
+  // Open Paystack payment popup
+  function initiatePayment() {
+    const err = document.getElementById('errMsg');
+    err.style.display = 'none';
+
+    if (!studentEmail) {
+      err.textContent = 'Student email not found. Please contact the Academic Office to add your email.';
+      err.style.display = 'block'; return;
+    }
+
+    const btn = document.getElementById('payBtn');
+    btn.textContent = 'Opening payment…';
+    btn.classList.add('loading');
+
+    const handler = PaystackPop.setup({
+      key:       PAYSTACK_PUBLIC_KEY,
+      email:     studentEmail,
+      amount:    AMOUNT_KOBO,
+      currency:  'NGN',
+      ref:       'CLR-' + studentMatric.replace(/\//g,'-') + '-' + Date.now(),
+      label:     studentName,
+      metadata: {
+        student_id:     studentId,
+        matric_number:  studentMatric,
+        custom_fields: [
+          { display_name: 'Matric Number', variable_name: 'matric_number', value: studentMatric },
+          { display_name: 'Student Name',  variable_name: 'student_name',  value: studentName  },
+        ]
+      },
+
+      // Called when payment is successful
+      callback: function(response) {
+        btn.textContent = 'Verifying payment…';
+        verifyPayment(response.reference);
+      },
+
+      // Called when user closes the popup without paying
+      onClose: function() {
+        btn.textContent = 'Pay ₦5,100.00 Now';
+        btn.classList.remove('loading');
+      }
+    });
+
+    handler.openIframe();
+  }
+
+  // Verify payment with our PHP backend
+  function verifyPayment(reference) {
+    fetch('paystack_verify.php', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ reference })
+    })
+    .then(r => r.json())
+    .then(data => {
+      if (data.success) {
+        // Show success overlay
+        document.getElementById('overlay').classList.add('show');
+      } else {
+        const err = document.getElementById('errMsg');
+        err.textContent   = data.message;
+        err.style.display = 'block';
+        document.getElementById('payBtn').textContent = 'Pay ₦5,100.00 Now';
+        document.getElementById('payBtn').classList.remove('loading');
+      }
+    })
+    .catch(() => {
+      const err = document.getElementById('errMsg');
+      err.textContent   = 'Payment verification failed. Please contact support with your payment reference.';
+      err.style.display = 'block';
+      document.getElementById('payBtn').textContent = 'Pay ₦5,100.00 Now';
+      document.getElementById('payBtn').classList.remove('loading');
+    });
+  }
+</script>
+</body>
+</html>

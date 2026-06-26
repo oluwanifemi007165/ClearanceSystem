@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Office Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{--blue:#2563EB;--black:#0F172A;--gray-50:#F8FAFC;--gray-100:#F1F5F9;--gray-200:#E2E8F0;--gray-400:#94A3B8;--gray-600:#475569;--white:#FFFFFF;--green:#16A34A;--red:#DC2626;--amber:#D97706;--radius:12px}
+    body{font-family:'Inter',sans-serif;background:var(--gray-50);min-height:100vh;color:var(--black)}
+    .navbar{background:var(--white);border-bottom:1px solid var(--gray-200);padding:0 40px;height:64px;display:flex;align-items:center;justify-content:space-between}
+    .navbar-left h1{font-family:'Sora',sans-serif;font-size:1.25rem;font-weight:700}
+    .navbar-left p{font-size:.85rem;color:var(--gray-400);margin-top:1px}
+    .btn-logout{display:flex;align-items:center;gap:7px;background:none;border:1px solid var(--gray-200);border-radius:8px;padding:8px 16px;font-family:'Inter',sans-serif;font-size:.875rem;font-weight:500;color:var(--gray-600);cursor:pointer;transition:background .15s}
+    .btn-logout:hover{background:var(--gray-100)}.btn-logout svg{width:16px;height:16px}
+    .main{max-width:1200px;margin:0 auto;padding:36px 40px}
+    .stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-bottom:28px}
+    .stat-card{background:var(--white);border:1px solid var(--gray-200);border-radius:var(--radius);padding:24px 28px}
+    .stat-card .stat-label{font-size:.82rem;color:var(--gray-400);margin-bottom:10px}
+    .stat-card .stat-value{font-family:'Sora',sans-serif;font-size:2rem;font-weight:700}
+    .stat-card .stat-value.green{color:var(--green)}
+    .section-card{background:var(--white);border:1px solid var(--gray-200);border-radius:var(--radius);padding:28px 32px;margin-bottom:24px}
+    .section-head{margin-bottom:24px}
+    .section-head h2{font-family:'Sora',sans-serif;font-size:1.05rem;font-weight:700;margin-bottom:3px}
+    .section-head p{font-size:.82rem;color:var(--gray-400)}
+    table{width:100%;border-collapse:collapse}
+    thead tr{border-bottom:2px solid var(--gray-100)}
+    thead th{text-align:left;font-size:.78rem;font-weight:600;color:var(--gray-600);padding:0 0 12px;letter-spacing:.04em;text-transform:uppercase}
+    tbody tr{border-bottom:1px solid var(--gray-100)}
+    tbody tr:last-child{border-bottom:none}
+    tbody td{padding:16px 0;font-size:.875rem;vertical-align:middle}
+    .col-id{width:120px;font-weight:700}.col-name{width:170px}.col-matric{width:150px}.col-date{width:110px;color:var(--gray-400)}.col-status{width:130px}.col-actions{width:220px;text-align:right}.col-action{width:80px;text-align:right}
+    .badge{display:inline-flex;align-items:center;gap:5px;padding:4px 12px;border-radius:6px;font-size:.75rem;font-weight:600}
+    .badge.approved{background:var(--black);color:white}.badge.rejected{background:var(--red);color:white}.badge.pending{background:var(--gray-100);color:var(--gray-600)}
+    .actions{display:flex;gap:8px;justify-content:flex-end}
+    .btn-view{width:34px;height:34px;border-radius:8px;border:1px solid var(--gray-200);background:var(--white);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background .15s}
+    .btn-view:hover{background:var(--gray-100)}.btn-view svg{width:15px;height:15px;stroke:var(--gray-600)}
+    .btn-approve{display:flex;align-items:center;gap:6px;padding:8px 16px;background:var(--black);color:white;border:none;border-radius:8px;font-family:'Sora',sans-serif;font-size:.8rem;font-weight:600;cursor:pointer;transition:background .15s}
+    .btn-approve:hover{background:#1e293b}.btn-approve svg{width:14px;height:14px}
+    .btn-reject{display:flex;align-items:center;gap:6px;padding:8px 16px;background:var(--red);color:white;border:none;border-radius:8px;font-family:'Sora',sans-serif;font-size:.8rem;font-weight:600;cursor:pointer;transition:background .15s}
+    .btn-reject:hover{background:#b91c1c}.btn-reject svg{width:14px;height:14px}
+    .empty{text-align:center;padding:40px 0;color:var(--gray-400);font-size:.875rem}
+    .empty svg{width:36px;height:36px;stroke:var(--gray-200);margin:0 auto 10px;display:block}
+    .overlay{display:none;position:fixed;inset:0;background:rgba(15,23,42,.45);z-index:200;align-items:center;justify-content:center}
+    .overlay.show{display:flex}
+    .modal{background:var(--white);border-radius:16px;padding:32px;width:100%;max-width:520px;animation:pop .3s cubic-bezier(.22,.68,0,1.2) both;max-height:90vh;overflow-y:auto}
+    @keyframes pop{from{opacity:0;transform:scale(.92)}to{opacity:1;transform:scale(1)}}
+    .modal h3{font-family:'Sora',sans-serif;font-size:1.05rem;font-weight:700;margin-bottom:4px}
+    .modal .modal-sub{font-size:.82rem;color:var(--gray-400);margin-bottom:20px}
+    .modal-info{background:var(--gray-50);border-radius:10px;padding:16px 20px;margin-bottom:20px;display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .modal-info .mi-item label{display:block;font-size:.7rem;color:var(--gray-400);margin-bottom:2px}
+    .modal-info .mi-item .mi-val{font-size:.875rem;font-weight:600}
+    .modal-field label{display:block;font-size:.8rem;font-weight:600;margin-bottom:6px}
+    .modal-field textarea{width:100%;padding:10px 14px;border:1.5px solid var(--gray-200);border-radius:8px;font-family:'Inter',sans-serif;font-size:.875rem;resize:none;height:72px;outline:none;background:var(--gray-50)}
+    .modal-field textarea:focus{border-color:var(--blue);background:var(--white)}
+    .modal-btns{display:flex;gap:10px;margin-top:20px}
+    .modal-cancel{flex:1;padding:11px;background:var(--white);border:1.5px solid var(--gray-200);border-radius:8px;font-family:'Sora',sans-serif;font-size:.875rem;font-weight:600;cursor:pointer}
+    .modal-cancel:hover{background:var(--gray-100)}
+    .modal-confirm{flex:2;padding:11px;color:white;border:none;border-radius:8px;font-family:'Sora',sans-serif;font-size:.875rem;font-weight:600;cursor:pointer}
+    .modal-confirm.approve{background:var(--black)}.modal-confirm.approve:hover{background:#1e293b}
+    .modal-confirm.reject{background:var(--red)}.modal-confirm.reject:hover{background:#b91c1c}
+    .view-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px}
+    .view-grid .vi label{font-size:.72rem;color:var(--gray-400);display:block;margin-bottom:2px}
+    .view-grid .vi .vv{font-size:.9rem;font-weight:600}
+    .view-block{background:var(--gray-50);border-radius:8px;padding:12px 16px;font-size:.85rem;color:var(--gray-600);margin-bottom:8px}
+    .view-block label{font-size:.72rem;color:var(--gray-400);display:block;margin-bottom:4px}
+    .close-btn{width:100%;padding:11px;background:var(--black);color:white;border:none;border-radius:8px;font-family:'Sora',sans-serif;font-size:.875rem;font-weight:600;cursor:pointer;margin-top:16px}
+    .close-btn:hover{background:#1e293b}
+    .toast{position:fixed;bottom:28px;right:28px;background:var(--black);color:white;padding:12px 20px;border-radius:10px;font-size:.875rem;font-weight:500;opacity:0;transform:translateY(10px);transition:opacity .3s,transform .3s;z-index:999;pointer-events:none}
+    .toast.show{opacity:1;transform:translateY(0)}.toast.green{background:var(--green)}.toast.red{background:var(--red)}
+
+    /* ── Feature 2: Rejection suggestions ── */
+    .reject-suggestions{margin-bottom:14px}
+    .reject-suggestions label{display:block;font-size:.8rem;font-weight:600;margin-bottom:8px}
+    .suggestions-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+    .suggestion-chip{padding:8px 12px;border:1.5px solid var(--gray-200);border-radius:8px;font-size:.78rem;font-weight:500;color:var(--gray-600);cursor:pointer;background:var(--white);text-align:left;transition:all .15s;line-height:1.4}
+    .suggestion-chip:hover{border-color:var(--red);color:var(--red);background:#FEF2F2}
+    .suggestion-chip.selected{border-color:var(--red);color:var(--red);background:#FEF2F2;font-weight:600}
+    .divider{display:flex;align-items:center;gap:10px;margin:12px 0;font-size:.75rem;color:var(--gray-400)}
+    .divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--gray-200)}
+
+    /* ── Feature 1: External records check ── */
+    .records-badge{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:6px;font-size:.72rem;font-weight:600;margin-left:8px;cursor:pointer;border:none}
+    .records-badge.clear{background:#F0FDF4;color:var(--green)}
+    .records-badge.warn{background:#FEF2F2;color:var(--red)}
+    .records-badge.loading{background:var(--gray-100);color:var(--gray-400)}
+    .records-badge svg{width:11px;height:11px}
+    .records-panel{display:none;background:#FEF2F2;border:1.5px solid #FECACA;border-radius:8px;padding:12px 14px;margin-top:10px;font-size:.78rem}
+    .records-panel.show{display:block}
+    .records-panel-row{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #FECACA}
+    .records-panel-row:last-child{border-bottom:none}
+    .records-panel-row .rp-label{color:#991B1B;font-weight:600}
+    .records-panel-row .rp-val{color:#7F1D1D}
+    .records-panel-title{font-weight:700;color:#991B1B;margin-bottom:6px;display:flex;align-items:center;gap:6px}
+  </style>
+</head>
+<body>
+<nav class="navbar">
+  <div class="navbar-left">
+    <h1 id="officeName">Office</h1>
+    <p>Office Dashboard</p>
+  </div>
+  <button class="btn-logout" onclick="window.location.href='logout.php'">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+    Logout
+  </button>
+</nav>
+<main class="main">
+  <div class="stats-grid">
+    <div class="stat-card"><div class="stat-label">Pending Reviews</div><div class="stat-value" id="statPending">0</div></div>
+    <div class="stat-card"><div class="stat-label">Approved Today</div><div class="stat-value green" id="statApproved">0</div></div>
+    <div class="stat-card"><div class="stat-label">Total Processed</div><div class="stat-value" id="statProcessed">0</div></div>
+  </div>
+  <div class="section-card">
+    <div class="section-head"><h2>Pending Clearances</h2><p>Review and approve or reject student clearance requests</p></div>
+    <table><thead><tr><th class="col-id">Clearance ID</th><th class="col-name">Student Name</th><th class="col-matric">Matric Number</th><th class="col-dept">Department</th><th class="col-date">Submitted</th><th id="recordsColHeader" style="display:none;width:160px">Records Check</th><th class="col-actions">Actions</th></tr></thead>
+    <tbody id="pendingBody"><tr><td colspan="7"><div class="empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>Loading…</div></td></tr></tbody></table>
+  </div>
+  <div class="section-card">
+    <div class="section-head"><h2>Processed Clearances</h2><p>Previously reviewed clearances</p></div>
+    <table><thead><tr><th class="col-id">Clearance ID</th><th class="col-name">Student Name</th><th class="col-matric">Matric Number</th><th class="col-status">Status</th><th class="col-date">Processed Date</th><th class="col-action">Action</th></tr></thead>
+    <tbody id="processedBody"><tr><td colspan="6"><div class="empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>Loading…</div></td></tr></tbody></table>
+  </div>
+</main>
+
+<!-- ── Action modal (Approve / Reject with suggestions) ── -->
+<div class="overlay" id="actionOverlay">
+  <div class="modal">
+    <h3 id="modalTitle">Approve Clearance</h3>
+    <p class="modal-sub" id="modalSub"></p>
+    <div class="modal-info">
+      <div class="mi-item"><label>Student Name</label><div class="mi-val" id="mName">—</div></div>
+      <div class="mi-item"><label>Matric Number</label><div class="mi-val" id="mMatric">—</div></div>
+      <div class="mi-item"><label>Department</label><div class="mi-val" id="mDept">—</div></div>
+      <div class="mi-item"><label>Clearance ID</label><div class="mi-val" id="mClearId">—</div></div>
+    </div>
+
+    <!-- FEATURE 2: Rejection suggestions (only shown when rejecting) -->
+    <div class="modal-field" id="commentField" style="display:none">
+      <div class="reject-suggestions">
+        <label>Select a reason <span style="color:#DC2626">*</span></label>
+        <div class="suggestions-grid" id="suggestionsGrid">
+          <!-- Populated dynamically based on office -->
+        </div>
+      </div>
+      <div class="divider">or type a custom reason</div>
+      <div class="modal-field" style="margin-bottom:0">
+        <textarea id="rejectComment" placeholder="Type a custom reason here (optional if you selected above)…"></textarea>
+      </div>
+    </div>
+
+    <div class="modal-btns">
+      <button class="modal-cancel" onclick="closeModal()">Cancel</button>
+      <button class="modal-confirm" id="modalConfirmBtn" onclick="confirmAction()">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<!-- View modal -->
+<div class="overlay" id="viewOverlay">
+  <div class="modal">
+    <h3>Student Details</h3><p class="modal-sub">Full clearance form information</p>
+    <div class="view-grid">
+      <div class="vi"><label>Full Name</label><div class="vv" id="vName">—</div></div>
+      <div class="vi"><label>Matric Number</label><div class="vv" id="vMatric">—</div></div>
+      <div class="vi"><label>Department</label><div class="vv" id="vDept">—</div></div>
+      <div class="vi"><label>Level</label><div class="vv" id="vLevel">—</div></div>
+      <div class="vi"><label>Phone</label><div class="vv" id="vPhone">—</div></div>
+      <div class="vi"><label>Emergency Contact</label><div class="vv" id="vEmergency">—</div></div>
+    </div>
+    <div class="view-block"><label>Reason for Clearance</label><span id="vReason">—</span></div>
+    <div class="view-block"><label>Address</label><span id="vAddress">—</span></div>
+    <button class="close-btn" onclick="document.getElementById('viewOverlay').classList.remove('show')">Close</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  let currentStudentId  = null;
+  let currentAction     = '';
+  let currentEntries    = {};
+  let selectedSuggestion = '';
+  let currentOffice     = '';
+
+  // ── Rejection suggestions per office ─────────────────────────
+  const REJECTION_REASONS = {
+    bursary: [
+      'Outstanding tuition fees',
+      'Unpaid accommodation fees',
+      'Unpaid library fine',
+      'Incomplete payment records',
+      'Missing payment receipt',
+      'Other financial obligation',
+    ],
+    head_of_department: [
+      'Incomplete coursework submission',
+      'Failed a compulsory course',
+      'Missing project/thesis submission',
+      'Incomplete attendance records',
+      'Pending carry-over courses',
+      'Academic misconduct on record',
+    ],
+    dean_of_school: [
+      'Pending disciplinary case',
+      'Academic records incomplete',
+      'Missing departmental approval',
+      'Faculty requirement not met',
+      'Examination malpractice record',
+      'Pending appeal or review',
+    ],
+    school_office: [
+      'Missing official documents',
+      'Incorrect student records',
+      'ID card not returned',
+      'Student file incomplete',
+      'Signature/stamp missing',
+      'Records not properly filed',
+    ],
+    student_affairs: [
+      'Outstanding fine or penalty',
+      'Student conduct violation',
+      'Club/society obligation pending',
+      'Hostel property not returned',
+      'Disciplinary record unresolved',
+      'Community service incomplete',
+    ],
+    center_of_enterprenur: [
+      'Entrepreneurship project incomplete',
+      'Required training not completed',
+      'Certificate not collected',
+      'Assessment not completed',
+      'Missing entrepreneurship report',
+      'Other requirement pending',
+    ],
+    admission_office: [
+      'Admission documents incomplete',
+      'Original certificates not submitted',
+      'Missing O-Level results',
+      'JAMB/UTME records missing',
+      'Biodata form incomplete',
+      'Admission letter not on file',
+    ],
+    accademic_affairs: [
+      'Transcript request pending',
+      'Results not fully uploaded',
+      'Missing semester results',
+      'Course registration incomplete',
+      'Academic record discrepancy',
+      'Graduation requirements not met',
+    ],
+    library: [
+      'Unreturned library book(s)',
+      'Outstanding library fine',
+      'Damaged book not replaced',
+      'Library card not returned',
+      'Overdue resource not returned',
+      'Other library obligation pending',
+    ],
+  };
+
+  // Default reasons if office not in list
+  const DEFAULT_REASONS = [
+    'Required documents missing',
+    'Incomplete information provided',
+    'Outstanding obligation pending',
+    'Records not up to date',
+    'Verification required',
+    'Other reason (specify below)',
+  ];
+
+  // FEATURE 1: Offices that need external records check (fees/library)
+  const RECORDS_CHECK_OFFICES = ['bursary', 'library'];
+
+  // Load office info
+  fetch('get_session_info.php').then(r=>r.json()).then(info=>{
+    if(!info.success||info.role!=='office'){window.location.href='login.html';return}
+    currentOffice = info.office || '';
+    document.getElementById('officeName').textContent = info.office_name || info.office;
+
+    // FEATURE 1: Show records check column only for offices that need it
+    if (RECORDS_CHECK_OFFICES.includes(currentOffice)) {
+      document.getElementById('recordsColHeader').style.display = '';
+    }
+
+    loadClearances();
+  });
+
+  function loadClearances() {
+    fetch('get_office_clearances.php').then(r=>r.json()).then(data=>{
+      if(!data.success){window.location.href='login.html';return}
+      document.getElementById('statPending').textContent   = data.stats.pending_count;
+      document.getElementById('statApproved').textContent  = data.stats.approved_today;
+      document.getElementById('statProcessed').textContent = data.stats.processed_count;
+      currentEntries = {};
+      [...data.pending,...data.processed].forEach(e=>{ currentEntries[e.id]=e; });
+      renderPending(data.pending);
+      renderProcessed(data.processed);
+    }).catch(()=>showToast('Failed to load clearances','red'));
+  }
+
+  function renderPending(rows) {
+    const tb = document.getElementById('pendingBody');
+    const showRecords = RECORDS_CHECK_OFFICES.includes(currentOffice);
+
+    if(!rows.length){
+      tb.innerHTML=`<tr><td colspan="${showRecords?7:6}"><div class="empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>No pending clearances</div></td></tr>`;
+      return;
+    }
+
+    const recordsCell = (sid) => showRecords
+      ? `<td>
+           <span class="records-badge loading" id="recBadge_${sid}">
+             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>
+             Checking…
+           </span>
+         </td>`
+      : '';
+
+    tb.innerHTML = rows.map(r=>`
+      <tr>
+        <td class="col-id">${r.clearance_id}</td>
+        <td class="col-name">${r.full_name}</td>
+        <td class="col-matric">${r.matric_number}</td>
+        <td>${r.department}</td>
+        <td class="col-date">${r.submitted_fmt}</td>
+        ${recordsCell(r.id)}
+        <td class="col-actions"><div class="actions">
+          <button class="btn-view" onclick="viewStudent(${r.id})" title="View details">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+          <button class="btn-approve" onclick="openAction('approve',${r.id},'${r.full_name}','${r.matric_number}','${r.department}','${r.clearance_id}')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Approve
+          </button>
+          <button class="btn-reject" onclick="openAction('reject',${r.id},'${r.full_name}','${r.matric_number}','${r.department}','${r.clearance_id}')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>Reject
+          </button>
+        </div></td>
+      </tr>`).join('');
+
+    // FEATURE 1: After rendering, check records for each student
+    if (showRecords) {
+      rows.forEach(r => checkStudentRecords(r.id));
+    }
+  }
+
+  // FEATURE 1: Fetch fee/library records for a student from external DB
+  function checkStudentRecords(studentId) {
+    fetch('check_student_records.php?student_id=' + studentId)
+      .then(r => r.json())
+      .then(data => {
+        const badge = document.getElementById('recBadge_' + studentId);
+        if (!badge || !data.success) return;
+
+        const hasIssue = data.has_outstanding || data.has_unreturned;
+
+        if (hasIssue) {
+          badge.className = 'records-badge warn';
+          badge.innerHTML = `
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+              <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+            </svg>
+            Issue Found`;
+          badge.onclick = () => showRecordsDetail(studentId, data);
+        } else {
+          badge.className = 'records-badge clear';
+          badge.innerHTML = `
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+            Clear`;
+        }
+      })
+      .catch(() => {
+        const badge = document.getElementById('recBadge_' + studentId);
+        if (badge) { badge.className = 'records-badge'; badge.textContent = 'Check failed'; }
+      });
+  }
+
+  // FEATURE 1: Show detailed fee/library records in the action modal area
+  function showRecordsDetail(studentId, data) {
+    let html = '';
+
+    if (data.has_outstanding) {
+      html += `<div class="records-panel show">
+        <div class="records-panel-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px">
+            <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+          </svg>
+          Outstanding Fees (₦${Number(data.total_owed).toLocaleString()} total)
+        </div>`;
+      data.outstanding_fees.forEach(f => {
+        html += `<div class="records-panel-row">
+          <span class="rp-label">${f.fee_type}</span>
+          <span class="rp-val">₦${Number(f.amount).toLocaleString()}</span>
+        </div>`;
+      });
+      html += `</div>`;
+    }
+
+    if (data.has_unreturned) {
+      html += `<div class="records-panel show" style="margin-top:8px">
+        <div class="records-panel-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px">
+            <path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/>
+          </svg>
+          Unreturned Library Books
+        </div>`;
+      data.library_records.forEach(b => {
+        html += `<div class="records-panel-row">
+          <span class="rp-label">${b.book_title}</span>
+          <span class="rp-val">Due: ${b.due_date}</span>
+        </div>`;
+      });
+      html += `</div>`;
+    }
+
+    alert('⚠️ This student has outstanding issues:\n\n' +
+      (data.has_outstanding ? data.outstanding_fees.map(f=>`• ${f.fee_type}: ₦${Number(f.amount).toLocaleString()}`).join('\n') + '\n' : '') +
+      (data.has_unreturned ? data.library_records.map(b=>`• Unreturned: ${b.book_title}`).join('\n') : '')
+    );
+  }
+
+  function renderProcessed(rows) {
+    const tb = document.getElementById('processedBody');
+    if(!rows.length){
+      tb.innerHTML='<tr><td colspan="6"><div class="empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>No processed clearances yet</div></td></tr>';
+      return;
+    }
+    tb.innerHTML = rows.map(r=>`
+      <tr>
+        <td class="col-id">${r.clearance_id}</td>
+        <td class="col-name">${r.full_name}</td>
+        <td class="col-matric">${r.matric_number}</td>
+        <td class="col-status"><span class="badge ${r.status}">${r.status}</span></td>
+        <td class="col-date">${r.processed_date}</td>
+        <td class="col-action"><div class="actions">
+          <button class="btn-view" onclick="viewStudent(${r.id})" title="View details">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+        </div></td>
+      </tr>`).join('');
+  }
+
+  function openAction(action, sid, name, matric, dept, clearId) {
+    currentStudentId   = sid;
+    currentAction      = action;
+    selectedSuggestion = '';
+    document.getElementById('mName').textContent    = name;
+    document.getElementById('mMatric').textContent  = matric;
+    document.getElementById('mDept').textContent    = dept;
+    document.getElementById('mClearId').textContent = clearId;
+    const isApprove = action === 'approve';
+    document.getElementById('modalTitle').textContent = isApprove ? 'Approve Clearance' : 'Reject Clearance';
+    document.getElementById('modalSub').textContent   = isApprove
+      ? "You are about to approve this student's clearance request."
+      : "Select a reason for rejection or type a custom one.";
+    document.getElementById('rejectComment').value   = '';
+
+    if (!isApprove) {
+      // Populate suggestion chips for this office
+      const reasons = REJECTION_REASONS[currentOffice] || DEFAULT_REASONS;
+      const grid    = document.getElementById('suggestionsGrid');
+      grid.innerHTML = reasons.map(r =>
+        `<button class="suggestion-chip" onclick="selectSuggestion(this, '${r.replace(/'/g,"\\'")}')">
+          ${r}
+        </button>`
+      ).join('');
+    }
+
+    document.getElementById('commentField').style.display = isApprove ? 'none' : 'block';
+    const cb = document.getElementById('modalConfirmBtn');
+    cb.textContent = isApprove ? 'Approve' : 'Reject';
+    cb.className   = 'modal-confirm ' + action;
+    document.getElementById('actionOverlay').classList.add('show');
+  }
+
+  // FEATURE 2: Select a suggestion chip
+  function selectSuggestion(chip, reason) {
+    // Deselect all chips
+    document.querySelectorAll('.suggestion-chip').forEach(c => c.classList.remove('selected'));
+    // Select this one
+    chip.classList.add('selected');
+    selectedSuggestion = reason;
+    // Put it in the textarea too so staff can see/edit it
+    document.getElementById('rejectComment').value = reason;
+  }
+
+  function closeModal() {
+    document.getElementById('actionOverlay').classList.remove('show');
+    currentStudentId = null; currentAction = ''; selectedSuggestion = '';
+  }
+
+  function confirmAction() {
+    // Use selected suggestion or typed comment
+    const typedComment = document.getElementById('rejectComment').value.trim();
+    const comment = typedComment || selectedSuggestion;
+
+    if (currentAction === 'reject' && !comment) {
+      showToast('Please select or type a reason for rejection.', 'red'); return;
+    }
+
+    const btn = document.getElementById('modalConfirmBtn');
+    const orig = btn.textContent;
+    btn.textContent = 'Processing…'; btn.style.opacity = '0.7'; btn.style.pointerEvents = 'none';
+
+    fetch('update_clearance.php', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({
+        student_id: currentStudentId,
+        status:     currentAction === 'approve' ? 'approved' : 'rejected',
+        comment:    comment
+      })
+    })
+    .then(r => r.json())
+    .then(data => {
+      if (data.success) {
+        showToast(data.message, currentAction === 'approve' ? 'green' : 'red');
+        closeModal();
+        loadClearances();
+      } else {
+        showToast(data.message, 'red');
+      }
+    })
+    .catch(() => showToast('Server error. Try again.', 'red'))
+    .finally(() => {
+      btn.textContent       = orig;
+      btn.style.opacity     = '1';
+      btn.style.pointerEvents = 'auto';
+    });
+  }
+
+  function viewStudent(sid) {
+    const e = currentEntries[sid];
+    if(!e) return;
+    document.getElementById('vName').textContent      = e.full_name         || '—';
+    document.getElementById('vMatric').textContent    = e.matric_number     || '—';
+    document.getElementById('vDept').textContent      = e.department        || '—';
+    document.getElementById('vLevel').textContent     = e.level             || '—';
+    document.getElementById('vPhone').textContent     = e.phone             || '—';
+    document.getElementById('vEmergency').textContent = e.emergency_contact || '—';
+    document.getElementById('vReason').textContent    = e.reason            || '—';
+    document.getElementById('vAddress').textContent   = e.address           || '—';
+    document.getElementById('viewOverlay').classList.add('show');
+  }
+
+  function showToast(msg, type='') {
+    const t = document.getElementById('toast');
+    t.textContent = msg; t.className = 'toast show' + (type?' '+type:'');
+    setTimeout(()=>{ t.className='toast'; }, 3500);
+  }
+
+  document.getElementById('actionOverlay').addEventListener('click', e => { if(e.target===e.currentTarget) closeModal(); });
+  document.getElementById('viewOverlay').addEventListener('click',   e => { if(e.target===e.currentTarget) document.getElementById('viewOverlay').classList.remove('show'); });
+</script>
+</body>
+</html>

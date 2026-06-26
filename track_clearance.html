@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Track Clearance</title>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{--blue:#2563EB;--black:#0F172A;--gray-50:#F8FAFC;--gray-100:#F1F5F9;--gray-200:#E2E8F0;--gray-400:#94A3B8;--gray-600:#475569;--white:#FFFFFF;--green:#16A34A;--red:#DC2626;--radius:12px}
+    body{font-family:'Inter',sans-serif;background:var(--gray-50);min-height:100vh;color:var(--black)}
+    .topbar{background:var(--white);border-bottom:1px solid var(--gray-200);padding:40px 250px;height:56px;display:flex;align-items:center}
+    .back-btn{display:flex;align-items:center;gap:8px;background:none;border:none;cursor:pointer;font-family:'Inter',sans-serif;font-size:.9rem;font-weight:500;color:var(--black)}
+    .back-btn:hover{color:var(--blue)}.back-btn svg{width:18px;height:18px}
+    .main{max-width:1100px;margin:0 auto;padding:36px 40px;display:flex;flex-direction:column;gap:24px}
+    .card{background:var(--white);border:1px solid var(--gray-200);border-radius:var(--radius);padding:32px 40px}
+    .header-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px}
+    .header-top h2{font-family:'Sora',sans-serif;font-size:1.05rem;font-weight:700;margin-bottom:3px}
+    .header-top .clearance-id{font-size:.8rem;color:var(--gray-400)}
+    .pill{display:inline-flex;align-items:center;gap:5px;padding:4px 12px;border-radius:20px;font-size:.75rem;font-weight:600}
+    .pill.in-progress{background:#EFF6FF;color:var(--blue);border:1px solid #BFDBFE}
+    .pill.completed{background:#F0FDF4;color:var(--green);border:1px solid #BBF7D0}
+    .pill.action-required{background:#FEF2F2;color:var(--red);border:1px solid #FECACA}
+    .pill-dot{width:6px;height:6px;border-radius:50%;background:currentColor}
+    .progress-label{display:flex;justify-content:space-between;font-size:.8rem;color:var(--gray-600);margin-bottom:6px}
+    .progress-track{height:6px;background:var(--gray-100);border-radius:99px;overflow:hidden;margin-bottom:20px}
+    .progress-fill{height:100%;background:var(--blue);border-radius:99px;transition:width .6s ease}
+    .progress-fill.complete{background:var(--green)}
+    .meta-row{display:grid;grid-template-columns:1fr 1fr;gap:4px}
+    .meta-item label{display:block;font-size:.72rem;color:var(--gray-400);margin-bottom:3px}
+    .meta-item .meta-val{font-size:.9rem;font-weight:600}
+    .timeline-head{margin-bottom:20px}
+    .timeline-head h2{font-family:'Sora',sans-serif;font-size:1.05rem;font-weight:700;margin-bottom:3px}
+    .timeline-head p{font-size:.82rem;color:var(--gray-400)}
+    .timeline{display:flex;flex-direction:column}
+    .tl-item{display:flex;position:relative}
+    .tl-item:not(:last-child) .tl-line{position:absolute;left:15px;top:32px;width:2px;bottom:0;background:var(--gray-200)}
+    .tl-item.approved:not(:last-child) .tl-line{background:var(--green)}
+    .tl-icon{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px;z-index:1;border:2px solid var(--gray-200);background:var(--white)}
+    .tl-icon svg{width:14px;height:14px}
+    .tl-item.approved .tl-icon{background:#F0FDF4;border-color:#86EFAC}
+    .tl-item.approved .tl-icon svg{stroke:var(--green)}
+    .tl-item.active .tl-icon{background:#EFF6FF;border-color:#93C5FD}
+    .tl-item.active .tl-icon svg{stroke:var(--blue)}
+    .tl-item.rejected .tl-icon{background:#FEF2F2;border-color:#FCA5A5}
+    .tl-item.rejected .tl-icon svg{stroke:var(--red)}
+    .tl-item.pending .tl-icon{background:var(--gray-100);border-color:var(--gray-200)}
+    .tl-item.pending .tl-icon svg{stroke:var(--gray-400)}
+    .tl-content{flex:1;padding-bottom:28px}
+    .tl-item:last-child .tl-content{padding-bottom:0}
+    .tl-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:3px}
+    .tl-name{font-size:18px;font-weight:600;padding-left: 23px;}
+    .tl-badge{font-size:.72rem;font-weight:600;padding:3px 10px;border-radius:6px}
+    .badge-pending{background:var(--gray-100);color:var(--gray-600)}
+    .badge-approved{background:#F0FDF4;color:var(--green)}
+    .badge-active{background:#EFF6FF;color:var(--blue)}
+    .badge-rejected{background:#FEF2F2;color:var(--red)}
+    .tl-sub{font-size:.8rem;color:var(--gray-400);padding-left: 23px;}
+    .tl-comment{margin-top:6px;font-size:.8rem;color:var(--red);background:#FEF2F2;border-radius:6px;padding:6px 10px;border-left:3px solid var(--red);margin-left:23px}
+    .tl-date{margin-top:4px;font-size:.75rem;color:var(--gray-400);padding-left: 23px;}
+    .loading-msg{text-align:center;padding:60px 0;color:var(--gray-400);font-size:.9rem}
+    .tl-resubmit-btn{margin-top:10px;margin-left:23px;display:inline-flex;align-items:center;gap:6px;padding:8px 16px;background:var(--red);color:white;border:none;border-radius:8px;font-size:.8rem;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:background .15s}
+    .tl-resubmit-btn:hover{background:#B91C1C}
+    .tl-resubmit-btn svg{width:13px;height:13px}
+  </style>
+</head>
+<body>
+<div class="topbar">
+  <button class="back-btn" onclick="window.location.href='dashboard.html'">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+    Back to Dashboard
+  </button>
+</div>
+<div class="main">
+  <div class="card" id="summaryCard">
+    <div class="loading-msg">Loading your clearance status…</div>
+  </div>
+  <div class="card" id="timelineCard">
+    <div class="loading-msg">Loading timeline…</div>
+  </div>
+</div>
+<script>
+  const OFFICES = [
+    { key: 'bursary',                                  name: 'Bursary' },
+    { key: 'head_of_department',                           name: 'HOD' },
+    { key: 'dean_of_school',                    name: 'Dean Of School' },
+    { key: 'school_office',                      name: 'School Office' },
+    { key: 'student_affairs',                  name: 'Student Affairs' },
+    { key: 'center_of_enterprenur',      name: 'Center Of Enterprenur' },
+    { key: 'admission_office',                name: 'Admission Office' },
+    { key: 'library',                            name: 'Library' },
+    { key: 'accademic_affairs',              name: 'Accademic Affairs' },
+  ];
+
+  // Fetch all clearance data from DB via PHP session
+  fetch('get_clearance_status.php')
+    .then(r => {
+      if (r.status === 401) { window.location.href = 'index.html'; return null; }
+      return r.json();
+    })
+    .then(data => {
+      if (!data || !data.success) { window.location.href = 'dashboard.html'; return; }
+      renderSummary(data);
+      renderTimeline(data);
+    })
+    .catch(() => window.location.href = 'dashboard.html');
+
+  function renderSummary(data) {
+    const statuses      = data.statuses || {};
+    const approvedCount = data.approved_count || 0;
+    const total         = data.total_offices  || 9;
+    const allDone       = data.overall_status === 'completed';
+    const hasRejection  = Object.values(statuses).some(s => s.status === 'rejected');
+    const pct           = Math.round((approvedCount / total) * 100);
+
+    // Active office
+    let activeOfficeName = '—';
+    if (!allDone) {
+      for (const o of OFFICES) {
+        const s = (statuses[o.key] || {}).status;
+        if (s === 'rejected') { activeOfficeName = 'Rejected at ' + o.name; break; }
+        if (!s || s === 'pending') { activeOfficeName = 'At ' + o.name; break; }
+      }
+    } else {
+      activeOfficeName = 'Fully Cleared';
+    }
+
+    // Pill
+    let pillClass = 'in-progress', pillText = 'In Progress';
+    if (allDone)          { pillClass = 'completed';       pillText = 'Completed'; }
+    else if (hasRejection){ pillClass = 'action-required'; pillText = 'Action Required'; }
+
+    // Submitted date
+    const subDate = data.submitted_at
+      ? new Date(data.submitted_at).toLocaleDateString('en-GB', { day:'numeric', month:'long', year:'numeric' })
+      : '—';
+
+    document.getElementById('summaryCard').innerHTML = `
+      <div class="header-top">
+        <div>
+          <h2>Clearance Tracking</h2>
+          <div class="clearance-id">Clearance ID: ${data.clearance_id || '—'}</div>
+        </div>
+        <div class="pill ${pillClass}"><span class="pill-dot"></span>${pillText}</div>
+      </div>
+      <div class="progress-label">
+        <span>Overall Progress</span>
+        <span>${approvedCount} of ${total} offices</span>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill ${allDone ? 'complete' : ''}" style="width:${pct}%"></div>
+      </div>
+      <div class="meta-row">
+        <div class="meta-item"><label>Submitted On</label><div class="meta-val">${subDate}</div></div>
+        <div class="meta-item"><label>Current Status</label><div class="meta-val">${activeOfficeName}</div></div>
+      </div>`;
+  }
+
+  // FEATURE 4: Resubmit clearance after rejection
+  function resubmitClearance(officeKey, officeName) {
+    if (!confirm(`Are you sure you want to resubmit your clearance to ${officeName}?\n\nMake sure you have resolved the issue before resubmitting.`)) return;
+
+    fetch('resubmit_clearance.php', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ office: officeKey })
+    })
+    .then(r => r.json())
+    .then(data => {
+      if (data.success) {
+        alert('✅ ' + data.message);
+        window.location.reload();
+      } else {
+        alert('❌ ' + data.message);
+      }
+    })
+    .catch(() => alert('Server error. Please try again.'));
+  }
+
+  function renderTimeline(data) {
+    const statuses = data.statuses || {};
+    const allDone  = data.overall_status === 'completed';
+
+    // Find the first non-approved index (active office)
+    let activeIndex  = -1;
+    let hasRejection = false;
+    if (!allDone) {
+      OFFICES.forEach((o, i) => {
+        const s = (statuses[o.key] || {}).status;
+        if (s === 'rejected') { hasRejection = true; if (activeIndex === -1) activeIndex = i; }
+        else if (!s || s === 'pending') { if (activeIndex === -1) activeIndex = i; }
+      });
+    }
+
+    let html = `
+      <div class="timeline-head">
+        <h2>Clearance Timeline</h2>
+        <p>Track the progress of your clearance through each office</p>
+      </div>
+      <div class="timeline">`;
+
+    OFFICES.forEach((office, i) => {
+      const info   = statuses[office.key] || {};
+      const status = info.status || 'pending';
+
+      // If allDone, force every office to show as approved
+      let itemClass = 'pending';
+      if (allDone || status === 'approved')        itemClass = 'approved';
+      else if (status === 'rejected')              itemClass = 'rejected';
+      else if (i === activeIndex && !hasRejection) itemClass = 'active';
+
+      // Icon
+      let iconSVG = '';
+      if (itemClass === 'approved') {
+        iconSVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>';
+      } else if (itemClass === 'rejected') {
+        iconSVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
+      } else {
+        iconSVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>';
+      }
+
+      // Badge
+      let badgeClass = 'badge-pending', badgeText = 'pending';
+      if (itemClass === 'approved')                      { badgeClass = 'badge-approved'; badgeText = 'approved'; }
+      else if (itemClass === 'rejected')                 { badgeClass = 'badge-rejected'; badgeText = 'rejected'; }
+      else if (i === activeIndex && !hasRejection)       { badgeClass = 'badge-active';   badgeText = 'reviewing'; }
+
+      // Sub text
+      let subText = 'Awaiting review';
+      if (itemClass === 'approved')                      subText = 'Cleared';
+      else if (itemClass === 'rejected')                 subText = 'Rejected — action required';
+      else if (i === activeIndex && !hasRejection)       subText = 'Currently being reviewed';
+
+      const commentHTML = (status === 'rejected' && info.comment)
+        ? `<div class="tl-comment"><strong>Reason:</strong> ${info.comment}</div>` : '';
+      const dateHTML = info.date
+        ? `<div class="tl-date">${info.date}</div>` : '';
+
+      // FEATURE 4: Resubmit button — only shown when this office rejected
+      const resubmitHTML = (status === 'rejected')
+        ? `<button class="tl-resubmit-btn" onclick="resubmitClearance('${office.key}', '${office.name}')">
+             <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+               <polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.95"/>
+             </svg>
+             Resolve & Resubmit
+           </button>` : '';
+
+      html += `
+        <div class="tl-item ${itemClass}">
+          <div class="tl-line"></div>
+          <div class="tl-icon">${iconSVG}</div>
+          <div class="tl-content">
+            <div class="tl-top">
+              <span class="tl-name">${office.name}</span>
+              <span class="tl-badge ${badgeClass}">${badgeText}</span>
+            </div>
+            <div class="tl-sub">${subText}</div>
+            ${commentHTML}
+            ${dateHTML}
+            ${resubmitHTML}
+          </div>
+        </div>`;
+    });
+
+    html += '</div>';
+    document.getElementById('timelineCard').innerHTML = html;
+  }
+</script>
+</body>
+</html>

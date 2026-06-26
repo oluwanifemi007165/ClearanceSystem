@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Request Clearance Access</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--blue:#2563EB;--black:#0F172A;--gray-50:#F8FAFC;--gray-100:#F1F5F9;--gray-200:#E2E8F0;--gray-400:#94A3B8;--white:#FFFFFF;--green:#16A34A;--red:#DC2626;--radius:12px}
+body{font-family:'Inter',sans-serif;background:var(--gray-50);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:30px 20px;color:var(--black)}
+.card{background:var(--white);border:1px solid var(--gray-200);border-radius:var(--radius);padding:36px;max-width:520px;width:100%}
+.icon-wrap{width:52px;height:52px;border-radius:12px;background:#EFF6FF;display:flex;align-items:center;justify-content:center;margin-bottom:18px}
+.icon-wrap svg{width:26px;height:26px;stroke:var(--blue)}
+h1{font-family:'Sora',sans-serif;font-size:1.25rem;font-weight:700;margin-bottom:6px}
+.sub{font-size:.85rem;color:var(--gray-400);margin-bottom:26px;line-height:1.6}
+.field{margin-bottom:16px}
+.field label{display:block;font-size:.8rem;font-weight:600;margin-bottom:6px}
+.field input,.field select,.field textarea{width:100%;padding:11px 14px;border:1.5px solid var(--gray-200);border-radius:8px;font-family:'Inter',sans-serif;font-size:.9rem;outline:none;background:var(--gray-50)}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--blue);background:var(--white)}
+.field textarea{resize:none;height:80px}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.err{font-size:.82rem;padding:10px 14px;background:#FEF2F2;border:1px solid #FECACA;color:var(--red);border-radius:8px;margin-bottom:14px;display:none}
+.btn-submit{width:100%;padding:13px;background:var(--black);color:white;border:none;border-radius:8px;font-family:'Sora',sans-serif;font-size:.95rem;font-weight:600;cursor:pointer;transition:background .2s;margin-top:6px}
+.btn-submit:hover{background:#1e293b}
+.btn-submit.loading{opacity:.7;pointer-events:none}
+.back-link{display:block;text-align:center;margin-top:18px;font-size:.85rem;color:var(--gray-400);text-decoration:none}
+.back-link:hover{color:var(--black)}
+
+/* Success state */
+.success-box{display:none;text-align:center}
+.success-icon{width:60px;height:60px;border-radius:50%;background:#F0FDF4;display:flex;align-items:center;justify-content:center;margin:0 auto 16px}
+.success-icon svg{width:30px;height:30px;stroke:var(--green)}
+.success-box h2{font-family:'Sora',sans-serif;font-size:1.15rem;font-weight:700;margin-bottom:8px}
+.success-box p{font-size:.875rem;color:var(--gray-400);line-height:1.6}
+</style>
+</head>
+<body>
+
+<div class="card">
+
+  <!-- Form state -->
+  <div id="formState">
+    <div class="icon-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
+    </div>
+    <h1>Request Clearance Access</h1>
+    <p class="sub">
+      If you graduated or left some time ago and your record is no longer in the system,
+      submit this form to request access. The Registry will review your request and
+      activate your account.
+    </p>
+
+    <div class="err" id="errMsg"></div>
+
+    <form id="requestForm">
+      <div class="field">
+        <label>Full Name</label>
+        <input type="text" id="fullName" placeholder="e.g. John Adebayo" required/>
+      </div>
+      <div class="field">
+        <label>Matric Number</label>
+        <input type="text" id="matricNumber" placeholder="e.g. CSC/2020/001" required/>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>Department</label>
+          <input type="text" id="department" placeholder="Computer Science" required/>
+        </div>
+        <div class="field">
+          <label>Level</label>
+          <input type="text" id="level" placeholder="ND2" required/>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>Email Address</label>
+          <input type="email" id="email" placeholder="you@email.com" required/>
+        </div>
+        <div class="field">
+          <label>Phone Number</label>
+          <input type="tel" id="phone" placeholder="08012345678"/>
+        </div>
+      </div>
+      <div class="field">
+        <label>Reason for Request</label>
+        <textarea id="reason" placeholder="e.g. I graduated in 2023 and need to complete clearance for my certificate."></textarea>
+      </div>
+      <button class="btn-submit" id="submitBtn" type="submit">Submit Request</button>
+    </form>
+
+    <a class="back-link" href="index.html">← Back to Login</a>
+  </div>
+
+  <!-- Success state -->
+  <div class="success-box" id="successState">
+    <div class="success-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+    </div>
+    <h2>Request Submitted!</h2>
+    <p>Your request has been sent to the Registry for review. You will be able to log in
+       once your account has been activated. Please check your email for updates.</p>
+    <a class="back-link" href="index.html" style="margin-top:20px">← Back to Login</a>
+  </div>
+
+</div>
+
+<script src="request_access.js"></script>
+</body>
+</html>
